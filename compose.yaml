@@ -1,0 +1,17 @@
+services:
+  app:
+    image: chat-generator:latest
+    container_name: chat-generator
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.chat_generator.entrypoints=websecure"
+      - "traefik.http.routers.chat_generator.rule=Host(`${APP_DOMAIN?domain is necessary}`)"
+      - "traefik.http.routers.chat_generator.tls=true"
+      - "traefik.http.services.chat_generator.loadbalancer.server.port=3000"
+    restart: on-failure
+
+networks:
+  traefik_proxy:
+    external: true
