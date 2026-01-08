@@ -1,8 +1,5 @@
 <script lang="ts">
-  let { userId, userName, current = null }: { userId: string; userName: string; current?: string | null } = $props();
-
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher();
+  let { userId, userName, current = null, onSet = undefined }: { userId: string; userName: string; current?: string | null; onSet?: (detail: { userId: string; dataUrl: string | null }) => void } = $props();
   let previewUrl = $state<string | null>(null);
 
   // Atualiza o preview sempre que current muda
@@ -23,7 +20,7 @@
     const reader = new FileReader();
     reader.onload = () => {
       // Envia o dataUrl para o pai para salvar
-      dispatch('set', { userId, dataUrl: reader.result as string });
+      onSet?.({ userId, dataUrl: reader.result as string });
       // Revoke o object URL quando não for mais necessário
       setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
     };
@@ -32,7 +29,7 @@
 
   function clearAvatar() {
     previewUrl = null;
-    dispatch('set', { userId, dataUrl: null });
+    onSet?.({ userId, dataUrl: null });
   }
 </script>
 
