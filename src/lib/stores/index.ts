@@ -1,9 +1,11 @@
 /**
  * Store combinado único que gerencia todo o estado da aplicação
- * Reduz múltiplas escritas no localStorage para uma única escrita por mudança
+ * Persistência agora fica em pgLite no browser, com debounce para reduzir escritas
  */
-import { writable, derived, get } from 'svelte/store';
-import { loadState, saveState, flushPendingSave, clearStorage } from '../services/storageService';
+import { browser } from '$app/environment';
+import { writable, derived } from 'svelte/store';
+import { loadPersistedState, savePersistedState, flushPendingSave, clearPersistedState, migrateLegacyLocalStorage } from '../services/pgPersistence';
+import { handleError } from '../utils/errorHandler';
 import type { AppState, User, Message, GroupSettings, PhoneTheme } from '../types';
 
 // Estado padrão
@@ -27,15 +29,12 @@ const defaults: AppState = {
     screenBgColor: '#f0f4f8',
     screenBgImage: null,
     frameGradientAngle: 135,
-    displayTime: '9:41',
+    displayTime: '09:41',
   },
 };
 
-// Carregar estado inicial
-const initialState = loadState() ?? defaults;
-
 // Store principal combinado
-export const appState = writable<AppState>(initialState);
+export const appState = writable<AppState>(defaults);
 
 // Stores derivados para compatibilidade com código existente
 export const users = derived(appState, ($state) => $state.users);
@@ -46,9 +45,36 @@ export const wallpaper = derived(appState, ($state) => $state.wallpaper);
 export const groupSettings = derived(appState, ($state) => $state.groupSettings);
 export const phoneTheme = derived(appState, ($state) => $state.phoneTheme);
 
+let persistenceReady = false;
+
+async function hydrateFromPersistence(): Promise<void> {
+  if (!browser) return;
+
+  try {
+    let restored = await loadPersistedState();
+
+    if (!restored) {
+      restored = await migrateLegacyLocalStorage();
+    }
+
+    if (restored) {
+      appState.set(restored);
+    }
+  } catch (err) {
+    handleError(err, { action: 'stores:hydrateFromPersistence' });
+  } finally {
+    persistenceReady = true;
+  }
+}
+
+if (browser) {
+  void hydrateFromPersistence();
+}
+
 // Inscrever no store principal para salvar automaticamente com debounce
 appState.subscribe((state) => {
-  saveState(state);
+  if (!browser || !persistenceReady) return;
+  savePersistedState(state);
 });
 
 // Garantir que dados sejam salvos antes de fechar a página
@@ -228,6 +254,6 @@ export function setSelectedUserIds(ids: string[]): void {
  */
 export function clearState(): void {
   appState.set(defaults);
-  clearStorage();
+  void clearPersistedState();
 }
 

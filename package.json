@@ -15,6 +15,7 @@
 		"lint": "prettier --check ."
 	},
 	"dependencies": {
+		"@electric-sql/pglite": "^0.3.14",
 		"html-to-image": "^1.11.11"
 	},
 	"devDependencies": {

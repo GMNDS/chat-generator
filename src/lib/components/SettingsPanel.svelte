@@ -43,8 +43,8 @@
     editingGroupName = '';
   }
 
-  function onGroupAvatarSet(event: CustomEvent) {
-    const { dataUrl } = event.detail;
+  function onGroupAvatarSet(payload: { userId: string; dataUrl: string | null }) {
+    const { dataUrl } = payload;
     setGroupAvatar(dataUrl ?? null);
   }
 
@@ -119,7 +119,7 @@
 
   <div class="config-field">
     <div style="font-weight: 500; color: #4a5568; margin-bottom: 0.5rem;">Avatar do Grupo</div>
-    <AvatarUploader userId="group" userName={localGroupSettings?.name ?? 'Meu Grupo'} current={localGroupSettings?.avatar} on:set={onGroupAvatarSet} />
+    <AvatarUploader userId="group" userName={localGroupSettings?.name ?? 'Meu Grupo'} current={localGroupSettings?.avatar} onSet={onGroupAvatarSet} />
     {#if localGroupSettings?.avatar}
       <div style="margin-top: 0.5rem; font-size: 0.875rem; color: #4a5568;">✅ Avatar do grupo definido</div>
     {/if}
@@ -166,11 +166,11 @@
       <input
         id="frame-color-1"
         type="color"
-        value={localPhoneTheme?.frameColor1 ?? '#667eea'}
+        value={localPhoneTheme?.frameColor1 || '#667eea'}
         onchange={onPhoneFrameColor1Change}
         style="width: 3rem; height: 2.5rem; border: none; border-radius: 6px; cursor: pointer;"
       />
-      <span style="font-size: 0.85rem; color: #718096; font-family: monospace;">{localPhoneTheme?.frameColor1 ?? '#667eea'}</span>
+      <span style="font-size: 0.85rem; color: #718096; font-family: monospace;">{localPhoneTheme?.frameColor1 || '#667eea'}</span>
     </div>
   </div>
 
@@ -180,11 +180,11 @@
       <input
         id="frame-color-2"
         type="color"
-        value={localPhoneTheme?.frameColor2 ?? '#764ba2'}
+        value={localPhoneTheme?.frameColor2 || '#764ba2'}
         onchange={onPhoneFrameColor2Change}
         style="width: 3rem; height: 2.5rem; border: none; border-radius: 6px; cursor: pointer;"
       />
-      <span style="font-size: 0.85rem; color: #718096; font-family: monospace;">{localPhoneTheme?.frameColor2 ?? '#764ba2'}</span>
+      <span style="font-size: 0.85rem; color: #718096; font-family: monospace;">{localPhoneTheme?.frameColor2 || '#764ba2'}</span>
     </div>
   </div>
 
@@ -210,11 +210,11 @@
       <input
         id="screen-bg-color"
         type="color"
-        value={localPhoneTheme?.screenBgColor ?? '#f0f4f8'}
+        value={localPhoneTheme?.screenBgColor || '#f0f4f8'}
         onchange={onPhoneScreenBgChange}
         style="width: 3rem; height: 2.5rem; border: none; border-radius: 6px; cursor: pointer;"
       />
-      <span style="font-size: 0.85rem; color: #718096; font-family: monospace;">{localPhoneTheme?.screenBgColor ?? '#f0f4f8'}</span>
+      <span style="font-size: 0.85rem; color: #718096; font-family: monospace;">{localPhoneTheme?.screenBgColor || '#f0f4f8'}</span>
     </div>
   </div>
 
